@@ -36,22 +36,26 @@ public class SharpDownloadRunner extends Observable implements Runnable {
             if (checkStop()) {
                 return;
             }
-            int statusCode = mStack.getstatusCode();
+            int statusCode = mStack.getStatusCode();
             if (statusCode == 206) {
                 InputStream in = mStack.getInputStream();
                 File file = new File(mDownloadInfo.filePath);
-                file.createNewFile();
+                long alreadyLength = 0;
+                if (file.exists()) {
+                    alreadyLength = file.length();
+                }
                 out = new FileOutputStream(file, true);
                 byte[] buff = new byte[2048];
                 int len;
-                int progress = 0;
+                long progress = alreadyLength;
                 while ((len = in.read(buff)) != -1) {
                     if (checkStop()) {
                         return;
                     }
                     out.write(buff, 0, len);
                     progress += len;
-                    mDownloadInfo.setProgress(progress);
+                    mDownloadInfo.setStatus(SharpDownloadStatus.DOWNLOADING);
+                    mDownloadInfo.setProgress((int) progress);
                     notifyObservers();
                 }
                 mDownloadInfo.setStatus(SharpDownloadStatus.FINISH);
@@ -65,10 +69,11 @@ public class SharpDownloadRunner extends Observable implements Runnable {
             notifyObservers();
         } catch (IOException e) {
             e.printStackTrace();
-            IOUtils.close(out);
             mDownloadInfo.setStatus(SharpDownloadStatus.ERROR);
             mDownloadInfo.e = e;
             notifyObservers();
+        } finally {
+            IOUtils.close(out);
         }
     }
 
@@ -85,14 +90,15 @@ public class SharpDownloadRunner extends Observable implements Runnable {
         mIsStop = true;
     }
 
-    public void cancel() {
+    public SharpDownloadRunner cancel() {
         pause();
         File file = new File(mDownloadInfo.filePath);
-        if (file.exists()){
+        if (file.exists()) {
             file.delete();
         }
         mDownloadInfo.setStatus(SharpDownloadStatus.CANCEL);
         notifyObservers();
+        return this;
     }
 
     @Override

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/SharpDownload.iml" filepath="$PROJECT_DIR$/SharpDownload.iml" />
       <module fileurl="file://$PROJECT_DIR$/SharpDownload-master.iml" filepath="$PROJECT_DIR$/SharpDownload-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharpdownload/sharpdownload.iml" filepath="$PROJECT_DIR$/sharpdownload/sharpdownload.iml" />

@@ -11,6 +11,32 @@ public class SharpDownLoadInfo {
     public TaskLevel taskLevel = TaskLevel.MIDDLE;
     public String url;
     public String filePath;
+    public String method = Constant.Methcd.GET;
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public Exception getE() {
+        return e;
+    }
+
+    public void setE(Exception e) {
+        this.e = e;
+    }
+
     public Exception e;
 
     public long getProgress() {
@@ -23,20 +49,14 @@ public class SharpDownLoadInfo {
 
     public int progress;
 
-    public String getTargetFile() {
-        return filePath;
-    }
-
-    public void setTargetFile(String targetFile) {
-        this.filePath = targetFile;
-    }
-
     public int getStatus() {
         return status;
     }
 
     public void setStatus(int status) {
-        this.status = status;
+        if (this.status != status) {
+            this.status = status;
+        }
     }
 
     public int status;

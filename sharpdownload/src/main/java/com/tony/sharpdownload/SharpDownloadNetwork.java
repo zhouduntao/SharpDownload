@@ -11,7 +11,7 @@ public interface SharpDownloadNetwork {
 
     void connect(SharpDownLoadInfo downLoadInfo) throws IOException;
 
-    int getstatusCode() throws IOException;
+    int getStatusCode() throws IOException;
 
     InputStream getInputStream() throws IOException;
 

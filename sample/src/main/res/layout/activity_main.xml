@@ -13,12 +13,25 @@
         android:layout_height="50dp"
         android:text="下载信息1"/>
 
-    <Button
-        android:id="@+id/download_button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="下载1"
-        />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/download_button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="下载1"
+            />
+        <Button
+            android:id="@+id/pase_button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="暂停1"
+            />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/download_info2"
         android:layout_width="match_parent"
@@ -31,6 +44,7 @@
         android:layout_height="wrap_content"
         android:text="下载2"
         />
+
     <TextView
         android:id="@+id/download_info3"
         android:layout_width="match_parent"

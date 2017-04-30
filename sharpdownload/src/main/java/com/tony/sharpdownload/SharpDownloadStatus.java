@@ -10,8 +10,8 @@ public interface SharpDownloadStatus {
     int WAIT = 0x00000001;
     int START = 0x00000002;
     int PAUSE = 0x00000003;
-    int DOWNLOADING = 0x00000003;
-    int FINISH = 0x00000004;
-    int ERROR = 0x00000005;
-    int CANCEL = 0x00000005;
+    int DOWNLOADING = 0x00000004;
+    int FINISH = 0x00000005;
+    int ERROR = 0x00000006;
+    int CANCEL = 0x00000007;
 }

@@ -1,5 +1,6 @@
 package com.tony.sharpdownload;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -20,17 +21,22 @@ public class HttpURLNetwork implements SharpDownloadNetwork {
     @Override
     public void connect(SharpDownLoadInfo downLoadInfo) throws IOException {
         URL url = new URL(downLoadInfo.getUrl());
-        if (mConn == null){
+        if (mConn == null) {
             mConn = (HttpURLConnection) url.openConnection();
         }
-        mConn.addRequestProperty("range", "bytes=" + 0 + "-");
-        mConn.setRequestMethod("GET");
+        long alreadyLen = 0;
+        File file = new File(downLoadInfo.filePath);
+        if (file.exists()) {
+            alreadyLen = file.length();
+        }
+        mConn.addRequestProperty("range", "bytes=" + alreadyLen + "-");
+        mConn.setRequestMethod(downLoadInfo.getMethod());
         mConn.connect();
     }
 
     @Override
-    public int getstatusCode() throws IOException {
-        if (mConn != null){
+    public int getStatusCode() throws IOException {
+        if (mConn != null) {
             return mConn.getResponseCode();
         }
         return 0;
@@ -38,7 +44,7 @@ public class HttpURLNetwork implements SharpDownloadNetwork {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        if (mConn != null){
+        if (mConn != null) {
             return mConn.getInputStream();
         }
         return null;
@@ -46,7 +52,7 @@ public class HttpURLNetwork implements SharpDownloadNetwork {
 
     @Override
     public void disConnect() {
-        if (mConn != null){
+        if (mConn != null) {
             mConn.disconnect();
         }
     }

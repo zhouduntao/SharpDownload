@@ -7,5 +7,8 @@ package com.tony.sharpdownload;
  * @since 2017/4/19 21:41
  */
 public interface Constant {
-
+    interface Methcd {
+        String GET = "GET";
+        String POST = "POST";
+    }
 }
