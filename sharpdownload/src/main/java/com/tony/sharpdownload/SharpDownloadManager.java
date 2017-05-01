@@ -59,23 +59,24 @@ public class SharpDownloadManager implements Observer {
         if (mRuningList.contains(downLoadInfo) || mWaitList.contains(downLoadInfo)) {
             return;
         }
-
-        if (mRuningList.size() <= mMaxSize) {
+        if (mRuningList.size() < mMaxSize) {
             addRunner(downLoadInfo);
         } else {
             switch (downLoadInfo.taskLevel) {
                 case HIGHT:
                     SharpDownLoadInfo removerDownloadInfo = mRuningList.removeFirst();
                     SharpDownloadRunner runner = mHm.get(removerDownloadInfo);
-                    runner.cancel();
+                    runner.pause();
                     mRuningList.remove(runner);
                     mWaitList.addFirst(removerDownloadInfo);
                     addRunner(downLoadInfo);
                     break;
                 case MIDDLE:
+                    downLoadInfo.setStatus(SharpDownloadStatus.WAIT);
                     mWaitList.addFirst(downLoadInfo);
                     break;
                 case LOW:
+                    downLoadInfo.setStatus(SharpDownloadStatus.WAIT);
                     mWaitList.addLast(downLoadInfo);
                     break;
             }
@@ -84,19 +85,20 @@ public class SharpDownloadManager implements Observer {
     }
 
     private void addRunner(SharpDownLoadInfo downLoadInfo) {
+        downLoadInfo.setStatus(SharpDownloadStatus.START);
         SharpDownloadRunner runner = new SharpDownloadRunner(new HttpURLNetwork(), downLoadInfo);
-        runner.addObserver(this);
+        downLoadInfo.addObserver(this);
         mHm.put(downLoadInfo, runner);
         mRuningList.add(downLoadInfo);
         ThreadUtils.run(runner);
     }
 
     public void addObserver(SharpDownLoadInfo downLoadInfo, Observer observer) {
-        mHm.get(downLoadInfo).addObserver(observer);
+        downLoadInfo.addObserver(observer);
     }
 
     public void removeObserver(SharpDownLoadInfo downLoadInfo, Observer observer) {
-        mHm.get(downLoadInfo).deleteObserver(observer);
+        downLoadInfo.deleteObserver(observer);
     }
 
     public void pause(SharpDownLoadInfo downLoadInfo) {
@@ -115,7 +117,7 @@ public class SharpDownloadManager implements Observer {
             case SharpDownloadStatus.ERROR:
             case SharpDownloadStatus.PAUSE:
                 mRuningList.remove(arg);
-                if (mWaitList.size()  > 0){
+                if (mWaitList.size() > 0) {
                     addRunner(mWaitList.removeFirst());
                 }
                 break;

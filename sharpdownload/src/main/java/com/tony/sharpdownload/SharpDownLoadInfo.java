@@ -1,12 +1,17 @@
 package com.tony.sharpdownload;
 
+import android.os.Handler;
+import android.os.Looper;
+
+import java.util.Observable;
+
 /**
  * @author Tony
  * @version 1.0
  *          <p><strong>Features draft description.主要功能介绍<></p>
  * @since 2017/4/19 21:36
  */
-public class SharpDownLoadInfo {
+public class SharpDownLoadInfo extends Observable{
 
     public TaskLevel taskLevel = TaskLevel.MIDDLE;
     public String url;
@@ -39,7 +44,7 @@ public class SharpDownLoadInfo {
 
     public Exception e;
 
-    public long getProgress() {
+    public int getProgress() {
         return progress;
     }
 
@@ -57,7 +62,7 @@ public class SharpDownLoadInfo {
         if (this.status != status) {
             this.status = status;
         }
-    }
+        notifyObservers();    }
 
     public int status;
 
@@ -78,6 +83,17 @@ public class SharpDownLoadInfo {
         this.url = url;
     }
 
+    @Override
+    public void notifyObservers() {
+        setChanged();
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                SharpDownLoadInfo.super.notifyObservers(SharpDownLoadInfo.this);
+            }
+        });
+
+    }
 
     public enum TaskLevel {
         HIGHT, MIDDLE, LOW,

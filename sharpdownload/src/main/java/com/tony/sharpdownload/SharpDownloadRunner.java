@@ -1,8 +1,6 @@
 package com.tony.sharpdownload;
 
-import android.os.Handler;
-import android.os.Looper;
-
+import com.tony.sharpdownload.util.DownloadRuntimeException;
 import com.tony.sharpdownload.util.IOUtils;
 
 import java.io.File;
@@ -10,21 +8,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Observable;
 
 /**
  * @author Tony
  * @version 1.0
  * @since 2017/4/19 21:37
  */
-public class SharpDownloadRunner extends Observable implements Runnable {
+public class SharpDownloadRunner implements Runnable {
 
-    private final SharpDownloadNetwork mStack;
+    private final SharpDownloadNetwork mNetwork;
     private final SharpDownLoadInfo mDownloadInfo;
     private boolean mIsStop = false;
 
     public SharpDownloadRunner(SharpDownloadNetwork stack, SharpDownLoadInfo info) {
-        mStack = stack;
+        mNetwork = stack;
         mDownloadInfo = info;
     }
 
@@ -32,46 +29,47 @@ public class SharpDownloadRunner extends Observable implements Runnable {
     public void run() {
         OutputStream out = null;
         try {
-            mStack.connect(mDownloadInfo);
+            mNetwork.connect(mDownloadInfo);
             if (checkStop()) {
                 return;
             }
-            int statusCode = mStack.getStatusCode();
+            int statusCode = mNetwork.getStatusCode();
             if (statusCode == 206) {
-                InputStream in = mStack.getInputStream();
+                InputStream in = mNetwork.getInputStream();
                 File file = new File(mDownloadInfo.filePath);
                 long alreadyLength = 0;
                 if (file.exists()) {
                     alreadyLength = file.length();
+                } else {
+
                 }
+                long totalLenght = mNetwork.getContentLenght() + alreadyLength;
                 out = new FileOutputStream(file, true);
                 byte[] buff = new byte[2048];
                 int len;
-                long progress = alreadyLength;
                 while ((len = in.read(buff)) != -1) {
                     if (checkStop()) {
                         return;
                     }
                     out.write(buff, 0, len);
-                    progress += len;
+                    alreadyLength += len;
+                    int progress = (int) (((alreadyLength * 100) / totalLenght) + .5f);
+                    mDownloadInfo.setProgress(progress);
                     mDownloadInfo.setStatus(SharpDownloadStatus.DOWNLOADING);
-                    mDownloadInfo.setProgress((int) progress);
-                    notifyObservers();
                 }
                 mDownloadInfo.setStatus(SharpDownloadStatus.FINISH);
                 out.close();
-                notifyObservers();
+            } else if (statusCode == 416) {
+                mDownloadInfo.setStatus(SharpDownloadStatus.FINISH);
             } else {
+                mDownloadInfo.setE(new DownloadRuntimeException("net work error: status code:" + statusCode));
                 mDownloadInfo.setStatus(SharpDownloadStatus.ERROR);
-                notifyObservers();
             }
-            mStack.disConnect();
-            notifyObservers();
+            mNetwork.disConnect();
         } catch (IOException e) {
             e.printStackTrace();
             mDownloadInfo.setStatus(SharpDownloadStatus.ERROR);
             mDownloadInfo.e = e;
-            notifyObservers();
         } finally {
             IOUtils.close(out);
         }
@@ -80,7 +78,6 @@ public class SharpDownloadRunner extends Observable implements Runnable {
     private boolean checkStop() {
         if (mIsStop) {
             mDownloadInfo.setStatus(SharpDownloadStatus.PAUSE);
-            notifyObservers();
             return true;
         }
         return false;
@@ -97,19 +94,7 @@ public class SharpDownloadRunner extends Observable implements Runnable {
             file.delete();
         }
         mDownloadInfo.setStatus(SharpDownloadStatus.CANCEL);
-        notifyObservers();
         return this;
     }
 
-    @Override
-    public void notifyObservers() {
-        setChanged();
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                SharpDownloadRunner.super.notifyObservers(mDownloadInfo);
-            }
-        });
-    }
 }

@@ -35,6 +35,12 @@ public class HttpURLNetwork implements SharpDownloadNetwork {
     }
 
     @Override
+    public int getContentLenght(){
+        return mConn.getContentLength();
+    }
+
+
+    @Override
     public int getStatusCode() throws IOException {
         if (mConn != null) {
             return mConn.getResponseCode();

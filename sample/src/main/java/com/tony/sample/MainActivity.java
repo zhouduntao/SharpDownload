@@ -19,14 +19,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button mDownLoadBtn1;
     private Button mDownLoadBtn2;
     private Button mDownLoadBtn3;
+    private Button mDownLoadBtn4;
+    private Button mDownLoadBtn5;
 
     private TextView mDownLoadInfoTv1;
     private TextView mDownLoadInfoTv2;
     private TextView mDownLoadInfoTv3;
+    private TextView mDownLoadInfoTv4;
+    private TextView mDownLoadInfoTv5;
 
     private SharpDownLoadInfo mInfo1;
     private SharpDownLoadInfo mInfo2;
     private SharpDownLoadInfo mInfo3;
+    private SharpDownLoadInfo mInfo4;
+    private SharpDownLoadInfo mInfo5;
     private String mDirectory;
     private Button mPauseBtn1;
 
@@ -39,18 +45,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mDownLoadBtn1 = (Button) findViewById(R.id.download_button1);
         mDownLoadBtn2 = (Button) findViewById(R.id.download_button2);
         mDownLoadBtn3 = (Button) findViewById(R.id.download_button3);
+        mDownLoadBtn4 = (Button) findViewById(R.id.download_button4);
+        mDownLoadBtn5 = (Button) findViewById(R.id.download_button5);
 
         mPauseBtn1 = (Button) findViewById(R.id.pase_button1);
 
         mDownLoadInfoTv1 = (TextView) findViewById(R.id.download_info1);
         mDownLoadInfoTv2 = (TextView) findViewById(R.id.download_info2);
         mDownLoadInfoTv3 = (TextView) findViewById(R.id.download_info3);
+        mDownLoadInfoTv4 = (TextView) findViewById(R.id.download_info4);
+        mDownLoadInfoTv5 = (TextView) findViewById(R.id.download_info5);
 
         mDownLoadBtn1.setOnClickListener(this);
         mDownLoadBtn2.setOnClickListener(this);
         mDownLoadBtn3.setOnClickListener(this);
+        mDownLoadBtn4.setOnClickListener(this);
+        mDownLoadBtn5.setOnClickListener(this);
 
         mPauseBtn1.setOnClickListener(this);
+
+        mInfo1 = new SharpDownLoadInfo();
+        mInfo2 = new SharpDownLoadInfo();
+        mInfo3 = new SharpDownLoadInfo();
+        mInfo4 = new SharpDownLoadInfo();
+        mInfo5 = new SharpDownLoadInfo();
     }
 
     @Override
@@ -58,30 +76,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mDirectory = Environment.getExternalStorageDirectory().getAbsolutePath() + "/sharp";
         switch (v.getId()) {
             case R.id.download_button1:
-                if (mInfo1 == null){
-                    mInfo1 = new SharpDownLoadInfo();
-                }
-                mInfo1.setFilePath(mDirectory + "/sharp1");
-                String url1 = "http://duntao.win/download/1.apk";
-                mInfo1.setUrl(url1);
-                SharpDownloadManager.get().enqueue(mInfo1);
-                SharpDownloadManager.get().addObserver(mInfo1, this);
+                startDownload("/sharp1",mInfo1);
                 break;
             case R.id.download_button2:
-                mInfo1 = new SharpDownLoadInfo();
-                mInfo1.setFilePath(mDirectory + "/sharp2");
-                String url2 = "http://duntao.win/download/1.apk";
-                mInfo1.setUrl(url2);
-                SharpDownloadManager.get().enqueue(mInfo1);
-                SharpDownloadManager.get().addObserver(mInfo1, this);
+                startDownload("/sharp2",mInfo2);
                 break;
             case R.id.download_button3:
-                mInfo1 = new SharpDownLoadInfo();
-                mInfo1.setFilePath(mDirectory + "/sharp3");
-                String url3 = "http://duntao.win/download/1.apk";
-                mInfo1.setUrl(url3);
-                SharpDownloadManager.get().enqueue(mInfo1);
-                SharpDownloadManager.get().addObserver(mInfo1, this);
+                startDownload("/sharp3",mInfo3);
+                break;
+            case R.id.download_button4:
+                startDownload("/sharp4",mInfo4);
+                break;
+            case R.id.download_button5:
+                startDownload("/sharp5",mInfo5);
                 break;
             case R.id.pase_button1:
                 SharpDownloadManager.get().pause(mInfo1);
@@ -90,22 +97,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void startDownload(String path,SharpDownLoadInfo info) {
+        info.setFilePath(mDirectory + path);
+        info.setTaskLevel(SharpDownLoadInfo.TaskLevel.HIGHT);
+        String url1 = "http://duntao.win/download/1.apk";
+        info.setUrl(url1);
+        SharpDownloadManager.get().enqueue(info);
+        SharpDownloadManager.get().addObserver(info, this);
+    }
+
     @Override
     public void update(Observable o, final Object arg) {
         SharpDownLoadInfo info = (SharpDownLoadInfo) arg;
         if (info.filePath.equals(mDirectory + "/sharp1")) {
-            switch (info.status) {
-                case SharpDownloadStatus.ERROR:
-                    mDownLoadInfoTv1.setText(info.e.toString());
-                    break;
-                case SharpDownloadStatus.DOWNLOADING:
-                    mDownLoadInfoTv1.setText(info.progress + "");
-                    break;
-            }
+            handleStatus(mDownLoadInfoTv1, info);
         } else if (info.filePath.equals(mDirectory + "/sharp2")) {
-            mDownLoadInfoTv2.setText(info.progress + "");
+            handleStatus(mDownLoadInfoTv2, info);
         } else if (info.filePath.equals(mDirectory + "/sharp3")) {
-            mDownLoadInfoTv3.setText(info.progress + "");
+            handleStatus(mDownLoadInfoTv3, info);
+        } else if (info.filePath.equals(mDirectory + "/sharp4")) {
+            handleStatus(mDownLoadInfoTv4, info);
+        } else if (info.filePath.equals(mDirectory + "/sharp5")) {
+            handleStatus(mDownLoadInfoTv5, info);
+        }
+    }
+
+
+    private void handleStatus(TextView textView, SharpDownLoadInfo info) {
+        switch (info.status) {
+            case SharpDownloadStatus.ERROR:
+                textView.setText(info.e.toString());
+                break;
+            case SharpDownloadStatus.DOWNLOADING:
+                textView.setText(info.progress + "");
+                break;
+            case SharpDownloadStatus.FINISH:
+                textView.setText("下载成功:文件地址:" + info.filePath);
+                break;
+                case SharpDownloadStatus.PAUSE:
+                    textView.setText("暂停");
+                break;
         }
     }
 }
